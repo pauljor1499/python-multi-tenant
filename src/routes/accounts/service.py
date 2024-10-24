@@ -3,6 +3,7 @@ from bson import ObjectId
 from src.connection import DATABASE, DB_CLIENT
 from src.routes.accounts.models import SchoolAccount, SchoolAdminAccount, SchoolTeacherAccount, SchoolStudentAccount
 from passlib.context import CryptContext
+from src.authentication import jwt_handler
 
 # Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -63,7 +64,7 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while creating school admin account")
 
 
-    async def login_school_admin_account(self, account_data: dict, request: Request) -> dict:
+    async def login_school_admin_account(self, account_data: dict) -> dict:
         try:
             data_model = SchoolAdminAccount(**account_data)
 
@@ -78,16 +79,9 @@ class AccountsService:
             school = await self.master_db["schools_collection"].find_one({"_id": user["school"]})
             if not school:
                 raise HTTPException(status_code=404, detail="School not found")
-            
-            request.state.user_data = {
-                "user_id": str(user["_id"]),
-                "school_code": str(school["code"])
-            }
 
-            return {
-                "message": "Login successful",
-                "user_data": request.state.user_data
-            }
+            token = jwt_handler.signJWT(str(user["_id"]), str(user["role"]), str(school["code"]))
+            return {"bearer_token": token}
         
         except HTTPException as error:
             raise error
@@ -120,7 +114,7 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while creating school admin account")
 
 
-    async def login_teacher_account(self, account_data: dict, request: Request) -> dict:
+    async def login_teacher_account(self, account_data: dict) -> dict:
         try:
             data_model = SchoolTeacherAccount(**account_data)
 
@@ -136,12 +130,9 @@ class AccountsService:
             if not school:
                 raise HTTPException(status_code=404, detail="School not found")
             
-            request.state.user_data = {
-                "user_id": str(user["_id"]),
-                "school_code": str(school["code"])
-            }
-
-            return {"message": "Login successful", "user_data": request.state.user_data}
+            token = jwt_handler.signJWT(str(user["_id"]), str(user["role"]), str(school["code"]))
+            return token
+        
         except HTTPException as error:
             raise error
         except Exception as e:
@@ -171,7 +162,7 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while creating school admin account")
 
 
-    async def login_student_account(self, account_data: dict, request: Request) -> dict:
+    async def login_student_account(self, account_data: dict) -> dict:
         try:
             data_model = SchoolStudentAccount(**account_data)
 
@@ -187,12 +178,9 @@ class AccountsService:
             if not school:
                 raise HTTPException(status_code=404, detail="School not found")
             
-            request.state.user_data = {
-                "user_id": str(user["_id"]),
-                "school_code": str(school["code"])
-            }
-
-            return {"message": "Login successful", "user_data": request.state.user_data}
+            token = jwt_handler.signJWT(str(user["_id"]), str(user["role"]), str(school["code"]))
+            return token
+        
         except HTTPException as error:
             raise error
         except Exception as e:

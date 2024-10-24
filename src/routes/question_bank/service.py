@@ -1,26 +1,29 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from bson import ObjectId
 from typing import Optional, Type
-from src.connection import DATABASE
+from src.connection import DATABASE, DB_CLIENT
 from src.routes.question_bank.models import QuestionModelCreate, QuestionModelUpdate
 from src.routes.question_bank.utilities.helpers import question_serializer
 from datetime import datetime, timezone
 
 
 class QuestionBankService:
+    # def __init__(self):
+    #     if DATABASE is not None:
+    #         self.collection = DATABASE["questions"]
+    #     else:
+    #         print(f"\033[31mERROR: Unable to connect to the database.\033[0m")
     def __init__(self):
-        if DATABASE is not None:
-            self.collection = DATABASE["questions"]
-        else:
-            print(f"\033[31mERROR: Unable to connect to the database.\033[0m")
+        self.client = DB_CLIENT
+        # self.collection = DATABASE["questions"]
             
 
-    async def create_question(self, question_data: QuestionModelCreate) -> dict:
+    async def create_question(self, question_data: QuestionModelCreate, request: Request) -> dict:
         try:
             # question_data.createdDate = datetime.now(timezone.utc)
-            result = await self.collection.insert_one(question_data.model_dump())
-            new_question = await self.fetch_question(str(result.inserted_id))
-            return {"new_question": new_question}
+            result = await self.client[request.state.user_data["school_code"]]["teacher_questionbank"].insert_one(question_data.model_dump())
+            # new_question = await self.fetch_question(str(result.inserted_id))
+            return {"new_question": str(result.inserted_id)}
         except HTTPException as error:
             raise error
         except Exception as e:

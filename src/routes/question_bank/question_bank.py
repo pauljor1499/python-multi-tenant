@@ -1,7 +1,8 @@
-from fastapi import Request, APIRouter, Body, status
+from fastapi import Request, APIRouter, Body, status, Depends
 from src.routes.question_bank.service import QuestionBankService
 from src.routes.question_bank.models import QuestionModelCreate, QuestionModelUpdate
 from src.routes.question_bank.utilities.payloads import questions
+from src.authentication.jwt_bearer import JWTBearer
 
 
 router = APIRouter()
@@ -13,9 +14,9 @@ async def fetch_questions(query: Request) -> dict:
     query_dict = dict(query.query_params)
     return await question_bank.fetch_questions(query_dict)
 
-@router.post("/create", response_model=dict, status_code=status.HTTP_200_OK)
-async def create_question(question_data: QuestionModelCreate = Body(openapi_examples=questions)) -> dict:
-    return await question_bank.create_question(question_data)
+@router.post("/create", dependencies=[Depends(JWTBearer(access_levels=["teacher"]))], response_model=dict, status_code=status.HTTP_200_OK)
+async def create_question(request: Request, question_data: QuestionModelCreate = Body(openapi_examples=questions)) -> dict:
+    return await question_bank.create_question(question_data, request)
 
 @router.get("/{question_id}", response_model=dict, status_code=status.HTTP_200_OK)
 async def fetch_question(question_id: str) -> dict:
