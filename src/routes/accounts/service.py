@@ -27,7 +27,8 @@ class AccountsService:
                 "analytics_collection",
                 "questions_collection",
                 "assignments_collection",
-                "classes_collection"
+                "classes_collection",
+                "teacher_questionbank"
             ]
             for collection in collections_to_create:
                 if collection not in existing_collections:

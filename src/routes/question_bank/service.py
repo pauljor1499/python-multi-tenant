@@ -23,7 +23,7 @@ class QuestionBankService:
             # question_data.createdDate = datetime.now(timezone.utc)
             result = await self.client[request.state.user_data["school_code"]]["teacher_questionbank"].insert_one(question_data.model_dump())
             # new_question = await self.fetch_question(str(result.inserted_id))
-            return {"new_question": str(result.inserted_id)}
+            return {"new_question": str(result.inserted_id), "school": request.state.user_data["school_code"]}
         except HTTPException as error:
             raise error
         except Exception as e:

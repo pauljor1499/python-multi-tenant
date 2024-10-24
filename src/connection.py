@@ -13,7 +13,8 @@ async def init_db():
             "school_admins_collection",
             "school_teachers_collection",
             "school_students_collection",
-            "schools_collection"
+            "schools_collection",
+            "global_questionbank"
         ]
         existing_collections = await DATABASE.list_collection_names()
         for collection in collections_to_create:
