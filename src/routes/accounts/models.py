@@ -7,6 +7,7 @@ from bson import ObjectId
 class SchoolAdminAccount(BaseModel):
     email: str
     password: str
+    school_code: Optional[str] = None
 
 class SchoolAccount(BaseModel):
     name: str
