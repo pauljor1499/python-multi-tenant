@@ -45,9 +45,16 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while logging in school admin account")
 
 
-    async def create_school_account(self, account_data: SchoolAccount) -> dict:
+    async def create_school_account(self, account_data: dict) -> dict:
         try:
-            result = await self.client["prod-master"]["school_collection"].insert_one(account_data)
+            data_model = SchoolAccount(**account_data)
+            result = await self.client["prod-master"]["school_collection"].insert_one(data_model.model_dump())
+
+            school_db = self.client[data_model.school_code]
+            await school_db.create_collection("analytics_collection")
+            await school_db.create_collection("questions_collection")
+            await school_db.create_collection("assignments_collection")
+
             return {"new_school_account_created": str(result.inserted_id)}
         except HTTPException as error:
             raise error
