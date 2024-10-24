@@ -35,10 +35,10 @@ class SchoolTeacherAccount(BaseModel):
     email: str
     password: str
     role: str = "teacher"
-    school_code: Optional[str] = None
+    school: Optional[ObjectIdField] = None
 
 class SchoolStudentAccount(BaseModel):
     email: str
     password: str
     role: str = "student"
-    school_code: Optional[str] = None
+    school: Optional[ObjectIdField] = None
