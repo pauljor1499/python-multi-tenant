@@ -6,6 +6,10 @@ router = APIRouter()
 
 account_service = AccountsService()
 
+@router.post("/school/create", response_model=dict)
+async def create_school_account(account_data: dict) -> dict:
+    return await account_service.create_school_account(account_data)
+
 @router.post("/school-admin/create", response_model=dict)
 async def create_school_admin_account(account_data: dict) -> dict:
     return await account_service.create_school_admin_account(account_data)
@@ -14,14 +18,18 @@ async def create_school_admin_account(account_data: dict) -> dict:
 async def login_school_admin_account(account_data: dict) -> dict:
     return await account_service.login_school_admin_account(account_data)
 
-# @router.get("/{question_id}", response_model=dict)
-# async def fetch_question(question_id: str) -> dict:
-#     return await account_service.fetch_question(question_id)
+@router.post("/teacher/create", response_model=dict)
+async def create_teacher_account(account_data: dict) -> dict:
+    return await account_service.create_teacher_account(account_data)
 
-# @router.delete("/delete/{question_id}", response_model=dict)
-# async def delete_question(question_id: str) -> dict:
-#     return await account_service.delete_question(question_id)
+@router.post("/teacher/login", response_model=dict)
+async def login_teacher_account(account_data: dict) -> dict:
+    return await account_service.login_teacher_account(account_data)
 
-@router.post("/school/create", response_model=dict)
-async def create_school_account(account_data: dict) -> dict:
-    return await account_service.create_school_account(account_data)
+@router.post("/student/create", response_model=dict)
+async def create_student_account(account_data: dict) -> dict:
+    return await account_service.create_student_account(account_data)
+
+@router.post("/student/login", response_model=dict)
+async def login_student_account(account_data: dict) -> dict:
+    return await account_service.login_student_account(account_data)
