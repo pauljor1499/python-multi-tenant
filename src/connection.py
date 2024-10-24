@@ -15,16 +15,13 @@ async def init_db():
             "school_students_collection",
             "schools_collection"
         ]
-
         existing_collections = await DATABASE.list_collection_names()
-
         for collection in collections_to_create:
             if collection not in existing_collections:
                 await DATABASE.create_collection(collection)
-                print(f"\033[32mINFO: Created collection: {collection}\033[0m")
-            else:
-                print(f"\033[33mWARNING: Collection '{collection}' already exists.\033[0m")
-
+            #     print(f"\033[32mINFO: Created collection: {collection}\033[0m")
+            # else:
+            #     print(f"\033[33mWARNING: Collection '{collection}' already exists.\033[0m")
         collections = await DATABASE.list_collection_names()
         print(f"\033[32mINFO: Connected to the database: [{DB_NAME}], collections: {collections}\033[0m")
     except Exception as e:

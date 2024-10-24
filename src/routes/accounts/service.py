@@ -52,9 +52,16 @@ class AccountsService:
             result = await self.master_db["schools_collection"].insert_one(data_model.model_dump())
 
             school_db = self.client[data_model.school_code]
-            await school_db.create_collection("analytics_collection")
-            await school_db.create_collection("questions_collection")
-            await school_db.create_collection("assignments_collection")
+            existing_collections = await school_db.list_collection_names()
+            collections_to_create = [
+                "analytics_collection",
+                "questions_collection",
+                "assignments_collection",
+                "classes_collection"
+            ]
+            for collection in collections_to_create:
+                if collection not in existing_collections:
+                    await school_db.create_collection(collection)
 
             return {"new_school_account_created": str(result.inserted_id)}
         except HTTPException as error:
