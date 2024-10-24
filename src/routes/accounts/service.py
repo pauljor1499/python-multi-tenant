@@ -42,17 +42,28 @@ class AccountsService:
 
     async def create_school_admin_account(self, account_data: dict) -> dict:
         try:
+            school = await self.master_db["schools_collection"].find_one({"name": account_data["school"]})
+            if not school:
+                raise HTTPException(status_code=404, detail="School not found. Cannot create admin account.")
+            
+            account_data["school"] = ObjectId(school["_id"])
             data_model = SchoolAdminAccount(**account_data)
+
             hashed_password = self.hash_password(data_model.password)
             account_data_dict = data_model.model_dump()
             account_data_dict["password"] = hashed_password
+
             result = await self.master_db["school_admins_collection"].insert_one(account_data_dict)
             return {"new_account_created": str(result.inserted_id)}
         except HTTPException as error:
             raise error
+        
         except Exception as e:
             print(f"\033[31mERROR: {e}\033[0m")
             raise HTTPException(status_code=500, detail="Error while creating school admin account")
+
+
+
 
 
     async def login_school_admin_account(self, account_data: dict) -> dict:
