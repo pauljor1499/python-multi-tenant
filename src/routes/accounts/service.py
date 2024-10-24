@@ -63,18 +63,15 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while creating school admin account")
 
 
-
-
-
     async def login_school_admin_account(self, account_data: dict) -> dict:
         try:
             data_model = SchoolAdminAccount(**account_data)
-            result = await self.master_db["school_admins_collection"].find_one({"email": data_model.email})
-            if not result:
+            user = await self.master_db["school_admins_collection"].find_one({"email": data_model.email})
+            if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
-            if not pwd_context.verify(data_model.password, result["password"]):
+            if not pwd_context.verify(data_model.password, user["password"]):
                 raise HTTPException(status_code=401, detail="Invalid password")
-            return {"message": "Login successful", "user_id": str(result["_id"])}
+            return {"message": "Login successful", "user_id": str(user["_id"])}
         except HTTPException as error:
             raise error
         except Exception as e:
@@ -100,12 +97,12 @@ class AccountsService:
     async def login_teacher_account(self, account_data: dict) -> dict:
         try:
             data_model = SchoolTeacherAccount(**account_data)
-            result = await self.master_db["school_teachers_collection"].find_one({"email": data_model.email})
-            if not result:
+            user = await self.master_db["school_teachers_collection"].find_one({"email": data_model.email})
+            if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
-            if not pwd_context.verify(data_model.password, result["password"]):
+            if not pwd_context.verify(data_model.password, user["password"]):
                 raise HTTPException(status_code=401, detail="Invalid password")
-            return {"message": "Login successful", "user_id": str(result["_id"])}
+            return {"message": "Login successful", "user_id": str(user["_id"])}
         except HTTPException as error:
             raise error
         except Exception as e:
@@ -131,12 +128,12 @@ class AccountsService:
     async def login_student_account(self, account_data: dict) -> dict:
         try:
             data_model = SchoolTeacherAccount(**account_data)
-            result = await self.master_db["school_students_collection"].find_one({"email": data_model.email})
-            if not result:
+            user = await self.master_db["school_students_collection"].find_one({"email": data_model.email})
+            if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
-            if not pwd_context.verify(data_model.password, result["password"]):
+            if not pwd_context.verify(data_model.password, user["password"]):
                 raise HTTPException(status_code=401, detail="Invalid password")
-            return {"message": "Login successful", "user_id": str(result["_id"])}
+            return {"message": "Login successful", "user_id": str(user["_id"])}
         except HTTPException as error:
             raise error
         except Exception as e:
