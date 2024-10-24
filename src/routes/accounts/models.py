@@ -21,11 +21,15 @@ class ObjectIdField(str):
     def __get_pydantic_json_schema__(cls, *args, **kwargs):
         return {"type": "string"}
 
+class SchoolAccount(BaseModel):
+    name: str
+    code: str
+    
 class SchoolAdminAccount(BaseModel):
     email: str
     password: str
     role: str = "admin"
-    school: ObjectIdField
+    school: Optional[ObjectIdField] = None
 
 class SchoolTeacherAccount(BaseModel):
     email: str
@@ -38,7 +42,3 @@ class SchoolStudentAccount(BaseModel):
     password: str
     role: str = "student"
     school_code: Optional[str] = None
-
-class SchoolAccount(BaseModel):
-    name: str
-    school_code: str

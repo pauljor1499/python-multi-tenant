@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from bson import ObjectId
 from src.connection import DATABASE, DB_CLIENT
 from src.routes.accounts.models import SchoolAccount, SchoolAdminAccount, SchoolTeacherAccount, SchoolStudentAccount
@@ -20,7 +20,7 @@ class AccountsService:
             data_model = SchoolAccount(**account_data)
             result = await self.master_db["schools_collection"].insert_one(data_model.model_dump())
 
-            school_db = self.client[data_model.school_code]
+            school_db = self.client[data_model.code]
             existing_collections = await school_db.list_collection_names()
             collections_to_create = [
                 "analytics_collection",
@@ -63,20 +63,40 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while creating school admin account")
 
 
-    async def login_school_admin_account(self, account_data: dict) -> dict:
+    async def login_school_admin_account(self, account_data: dict, request: Request) -> dict:
         try:
             data_model = SchoolAdminAccount(**account_data)
+
             user = await self.master_db["school_admins_collection"].find_one({"email": data_model.email})
+
             if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
+            
             if not pwd_context.verify(data_model.password, user["password"]):
                 raise HTTPException(status_code=401, detail="Invalid password")
-            return {"message": "Login successful", "user_id": str(user["_id"])}
+            
+            school = await self.master_db["schools_collection"].find_one({"_id": user["school"]})
+            if not school:
+                raise HTTPException(status_code=404, detail="School not found")
+            
+            request.state.user_data = {
+                "user_id": str(user["_id"]),
+                "school_code": str(school["code"])
+            }
+
+            return {
+                "message": "Login successful",
+                "user_id": str(user["_id"]),
+                "school_code": str(school["code"])
+            }
+        
         except HTTPException as error:
             raise error
+        
         except Exception as e:
             print(f"\033[31mERROR: {e}\033[0m")
             raise HTTPException(status_code=500, detail="Error while logging in school admin account")
+
     
 
     async def create_teacher_account(self, account_data: dict) -> dict:
