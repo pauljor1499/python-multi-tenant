@@ -24,6 +24,7 @@ class AccountsService:
             school_db = self.client[data_model.code]
             existing_collections = await school_db.list_collection_names()
             collections_to_create = [
+                "feature_flags_collection",
                 "analytics_collection",
                 "questions_collection",
                 "assignments_collection",
