@@ -20,7 +20,7 @@ async def login_school_admin_account(account_data: dict) -> dict:
 
 @router.post("/teacher/create", response_model=dict)
 async def create_teacher_account(account_data: dict) -> dict:
-    return await account_service.create_teacher_account(account_data)
+    return await account_service.create_teacher_accounts(account_data)
 
 @router.post("/teacher/login", response_model=dict)
 async def login_teacher_account(account_data: dict) -> dict:
@@ -28,7 +28,7 @@ async def login_teacher_account(account_data: dict) -> dict:
 
 @router.post("/student/create", response_model=dict)
 async def create_student_account(account_data: dict) -> dict:
-    return await account_service.create_student_account(account_data)
+    return await account_service.create_student_accounts(account_data)
 
 @router.post("/student/login", response_model=dict)
 async def login_student_account(account_data: dict) -> dict:

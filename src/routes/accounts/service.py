@@ -94,26 +94,32 @@ class AccountsService:
 
     
 
-    async def create_teacher_account(self, account_data: dict) -> dict:
+    async def create_teacher_accounts(self, account_data: dict) -> dict:
         try:
             school = await self.master_db["schools_collection"].find_one({"name": account_data["school"]})
             if not school:
-                raise HTTPException(status_code=404, detail="School not found. Cannot create admin account.")
+                raise HTTPException(status_code=404, detail="School not found. Cannot create teacher accounts.")
             
-            account_data["school"] = ObjectId(school["_id"])
-            data_model = SchoolTeacherAccount(**account_data)
+            created_accounts = []
 
-            hashed_password = self.hash_password(data_model.password)
-            account_data_dict = data_model.model_dump()
-            account_data_dict["password"] = hashed_password
+            for teacher_data in account_data["teachers_list"]:
+                teacher_data["school"] = ObjectId(school["_id"])
+                data_model = SchoolTeacherAccount(**teacher_data)
 
-            result = await self.master_db["school_teachers_collection"].insert_one(account_data_dict)
-            return {"new_account_created": str(result.inserted_id)}
+                hashed_password = self.hash_password(data_model.password)
+                teacher_account_data = data_model.model_dump()
+                teacher_account_data["password"] = hashed_password
+
+                result = await self.master_db["school_teachers_collection"].insert_one(teacher_account_data)
+                created_accounts.append(str(result.inserted_id))
+            
+            return {"school": school["name"],"new_accounts_created": created_accounts}
+
         except HTTPException as error:
             raise error
         except Exception as e:
             print(f"\033[31mERROR: {e}\033[0m")
-            raise HTTPException(status_code=500, detail="Error while creating school admin account")
+            raise HTTPException(status_code=500, detail="Error while creating teacher accounts")
 
 
     async def login_teacher_account(self, account_data: dict) -> dict:
@@ -142,21 +148,26 @@ class AccountsService:
             raise HTTPException(status_code=500, detail="Error while logging in school admin account")
     
 
-    async def create_student_account(self, account_data: dict) -> dict:
+    async def create_student_accounts(self, account_data: dict) -> dict:
         try:
             school = await self.master_db["schools_collection"].find_one({"name": account_data["school"]})
             if not school:
-                raise HTTPException(status_code=404, detail="School not found. Cannot create admin account.")
+                raise HTTPException(status_code=404, detail="School not found. Cannot create teacher accounts.")
             
-            account_data["school"] = ObjectId(school["_id"])
-            data_model = SchoolStudentAccount(**account_data)
+            created_accounts = []
 
-            hashed_password = self.hash_password(data_model.password)
-            account_data_dict = data_model.model_dump()
-            account_data_dict["password"] = hashed_password
+            for student_data in account_data["students_list"]:
+                student_data["school"] = ObjectId(school["_id"])
+                data_model = SchoolStudentAccount(**student_data)
+
+                hashed_password = self.hash_password(data_model.password)
+                student_account_data = data_model.model_dump()
+                student_account_data["password"] = hashed_password
+
+                result = await self.master_db["school_students_collection"].insert_one(student_account_data)
+                created_accounts.append(str(result.inserted_id))
             
-            result = await self.master_db["school_students_collection"].insert_one(account_data_dict)
-            return {"new_account_created": str(result.inserted_id)}
+            return {"school": school["name"],"new_accounts_created": created_accounts}
         except HTTPException as error:
             raise error
         except Exception as e:
