@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Request
 from bson import ObjectId
-from src.connection import DATABASE_MASTER, DB_CLIENT
+from src.connection import DB_CLIENT, DATABASE_MASTER, DATABASE_USERS, DATABASE_GLOBAL_QUESTIONBANK
 from src.routes.accounts.models import SchoolAccount, SchoolAdminAccount, SchoolTeacherAccount, SchoolStudentAccount
 from passlib.context import CryptContext
 from src.authentication import jwt_handler
@@ -11,6 +11,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class AccountsService:
     def __init__(self):
         self.master_db = DATABASE_MASTER
+        self.users_db = DATABASE_USERS
+        self.global_question_bank = DATABASE_GLOBAL_QUESTIONBANK
         self.client = DB_CLIENT
 
     def hash_password(self, password: str) -> str:
@@ -237,15 +239,13 @@ class AccountsService:
 
             # Create the admin account
             admin_data = account_data["admin"]
-            admin_data["role"] = "admin"
+            admin_data["role"] = "school-admin"
             admin_data["school"] = school_id
             data_model = SchoolAdminAccount(**admin_data)
-
-            hashed_password = self.hash_password(data_model.password)
             account_data_dict = data_model.model_dump()
-            account_data_dict["password"] = hashed_password
+            account_data_dict["password"] = self.hash_password(data_model.password)
 
-            admin_insert_result = await self.master_db["school_admins_collection"].insert_one(account_data_dict)
+            admin_insert_result = await self.users_db["school_admins_collection"].insert_one(account_data_dict)
             created_accounts["admin"] = str(admin_insert_result.inserted_id)
 
             # Create teacher accounts
@@ -255,7 +255,7 @@ class AccountsService:
                 teacher_data_dict = teacher_model.model_dump()
                 teacher_data_dict["password"] = self.hash_password(teacher_model.password)
 
-                teacher_insert_result = await self.master_db["school_teachers_collection"].insert_one(teacher_data_dict)
+                teacher_insert_result = await self.users_db["school_teachers_collection"].insert_one(teacher_data_dict)
                 created_accounts["teachers"].append(str(teacher_insert_result.inserted_id))
 
             # Create student accounts
@@ -265,7 +265,7 @@ class AccountsService:
                 student_data_dict = student_model.model_dump()
                 student_data_dict["password"] = self.hash_password(student_model.password)
 
-                student_insert_result = await self.master_db["school_students_collection"].insert_one(student_data_dict)
+                student_insert_result = await self.users_db["school_students_collection"].insert_one(student_data_dict)
                 created_accounts["students"].append(str(student_insert_result.inserted_id))
 
             return created_accounts
