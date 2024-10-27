@@ -1,6 +1,6 @@
 from fastapi import HTTPException, Request
 from bson import ObjectId
-from src.connection import DATABASE, DB_CLIENT
+from src.connection import DATABASE_MASTER, DB_CLIENT
 from src.routes.accounts.models import SchoolAccount, SchoolAdminAccount, SchoolTeacherAccount, SchoolStudentAccount
 from passlib.context import CryptContext
 from src.authentication import jwt_handler
@@ -10,7 +10,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AccountsService:
     def __init__(self):
-        self.master_db = DATABASE
+        self.master_db = DATABASE_MASTER
         self.client = DB_CLIENT
 
     def hash_password(self, password: str) -> str:

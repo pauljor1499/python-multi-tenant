@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from bson import ObjectId
-from src.connection import DATABASE
+from src.connection import DATABASE_MASTER
 from datetime import datetime, timezone
 from src.routes.feature_flags.models import CreateFeatureFlag, FeatureFlag
 from typing import Optional
@@ -20,8 +20,8 @@ def feature_serializer(feature: dict) -> dict:
 
 class FeatureFlags:
     def __init__(self):
-        if DATABASE is not None:
-            self.collection = DATABASE["feature_flags"]
+        if DATABASE_MASTER is not None:
+            self.collection = DATABASE_MASTER["feature_flags"]
         else:
             print(f"\033[31mERROR: Unable to connect to the database.\033[0m")
     
