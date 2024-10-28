@@ -72,7 +72,7 @@ class AccountsService:
         try:
             data_model = SchoolAdminAccount(**account_data)
 
-            user = await self.master_db["school_admins_collection"].find_one({"email": data_model.email})
+            user = await self.users_db["school_admins_collection"].find_one({"email": data_model.email})
 
             if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
@@ -128,7 +128,7 @@ class AccountsService:
         try:
             data_model = SchoolTeacherAccount(**account_data)
 
-            user = await self.master_db["school_teachers_collection"].find_one({"email": data_model.email})
+            user = await self.users_db["school_teachers_collection"].find_one({"email": data_model.email})
 
             if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
@@ -181,7 +181,7 @@ class AccountsService:
         try:
             data_model = SchoolStudentAccount(**account_data)
 
-            user = await self.master_db["school_students_collection"].find_one({"email": data_model.email})
+            user = await self.users_db["school_students_collection"].find_one({"email": data_model.email})
 
             if not user:
                 raise HTTPException(status_code=404, detail="Account not found")
