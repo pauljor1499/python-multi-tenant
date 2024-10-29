@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="Question Bank API",
+    title="Hybrid Multi-tenancy API",
     description="Owned by: EruditionTx Team",
     version="Version 1.0",
     lifespan=lifespan
